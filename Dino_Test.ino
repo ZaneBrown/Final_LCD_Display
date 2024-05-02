@@ -120,7 +120,6 @@ void dino_game() {
     update_game();
     if(joystick.was_pressed() == 1 && millis()-start_time>=1500) {//change? 500 ms between jumps
       start_time = millis();
-      Serial.println(start_time);
       draw(dino_char, 0, 0);
       lcd.setCursor(0,1);
       positions[0][0] = 2;
