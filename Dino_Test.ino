@@ -29,9 +29,10 @@ int updates_velocity = 0;
 int spawn_time = 4000/velocity;
 
 int last_update = 0;
-int update_time = spawn_time/6;
+float update_time = spawn_time/6;
 
 int score_overall = 0;
+int game_start_time = 0;
 int start_time = millis();
 
 int times_played = 1;
@@ -91,15 +92,15 @@ void game2() {
         lcd.setCursor(0,0);
         lcd.print("Butt man.");
         lcd.setCursor(0,1);
-        lcd.print("Sweet!");
+        lcd.print("The best choice!");
         choice = 3;
       }
       if(joystick.was_pressed() == 1 && choice == 2) {
         lcd.clear();
         lcd.setCursor(0,0);
-        lcd.print("Titties");
+        lcd.print("Nice");
         lcd.setCursor(0,1);
-        lcd.print("Nice!");
+        lcd.print("Titties!");
         choice = 3;
       }
     }
@@ -142,6 +143,7 @@ void start_game() {
   draw(dino_char, 0, 1);
   positions[1][0] = 2;
   update_score();
+  game_start_time = millis();
 }
 
 void end_game() {
@@ -151,7 +153,7 @@ void end_game() {
 
 void update_score() {
   if(game == true) {
-    score_overall = millis()/1000;
+    score_overall = (millis()-game_start_time)/1000;
     int length = numdigits(score_overall);
     lcd.setCursor(16-length, 0);//15
     lcd.print(score_overall);
@@ -172,20 +174,19 @@ void update_score() {
 void update_game() {
   if(millis() - last_spawn >= spawn_time){
     if(updates_velocity % 5 == 0 && velocity < velocity_bound) {
-      velocity += 0.2;
+      velocity += 0.05;
     }
     last_spawn += spawn_time;
-    spawn_time = 4000/velocity;
+    spawn_time = 2000/velocity;
     updates_velocity += 1;
     cacti_spawn();
-    }
-
-    if(millis() - last_update >= update_time) {
-      update_all_cacti();
-      last_update+=update_time;
-      update_time = spawn_time/6;
-      update_score();
-    }
+  }
+  update_time = spawn_time/6;
+  if(millis() - last_update >= update_time) {
+    update_all_cacti();
+    last_update+=update_time;
+    update_score();
+  }
 }
 
 void update_all_cacti(){
