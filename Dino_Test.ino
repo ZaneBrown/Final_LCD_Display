@@ -46,19 +46,19 @@ void setup() {
   lcd.begin(16, 2);//col, row
   lcd.createChar(0, dino);//lcd has max of 8 custom characters
   lcd.createChar(1, cacti);
+  lcd.setCursor(0, 0);
+    lcd.print("1. Dinosaur Game");
 }
 
 void loop() {
-  if(left_presses >= 10) {
+  if(left_presses >= 10  && game == true) {
     game2();
   }
-  else if(millis()-time_last_secret >= 500 && joystick.get_xPos() <= -90) {
+  else if(millis()-time_last_secret >= 500 && joystick.get_xPos() <= -90 && game == true) {
     left_presses++;
     time_last_secret = millis();
   }
   else if(times_played == 1) {
-    lcd.setCursor(0, 0);
-    lcd.print("1. Dinosaur Game");
     if(choice == 1 && joystick.was_pressed() == 1) {
       dino_game();
       times_played++;
