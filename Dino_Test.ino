@@ -23,7 +23,7 @@ int positions[2][16] = {
   {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
 };//row, col
 float velocity = 1;
-float velocity_bound = 2;
+float velocity_bound = 10;//2
 int last_spawn = 0;
 int updates_velocity = 0;
 int spawn_time = 4000/velocity;
@@ -32,22 +32,32 @@ int last_update = 0;
 int update_time = spawn_time/6;
 
 int score_overall = 0;
+int start_time = millis();
+
+int choice = 1;
+
 
 void setup() {
   Serial.begin(9600);
   lcd.begin(16, 2);//col, row
   lcd.createChar(0, dino);//lcd has max of 8 custom characters
   lcd.createChar(1, cacti);
+  lcd.cursor();
+  lcd.noCursor();
 }
 
 void loop() {
   //lcd.print("1. Dinosaur Game");
+  dino_game();
+}
+
+void dino_game() {
   start_game();
   while(game == true) {
     update_game();
-    
-    if(joystick.was_pressed() == 1) {
-      int start_time = millis();
+    if(joystick.was_pressed() == 1 && millis()-start_time>=1500) {//change? 500 ms between jumps
+      start_time = millis();
+      Serial.println(start_time);
       draw(dino_char, 0, 0);
       lcd.setCursor(0,1);
       positions[0][0] = 2;
@@ -74,24 +84,42 @@ void start_game() {
 void end_game() {
   lcd.clear();
   game = false;
-  //lcd.setCursor
+  lcd.setCursor(11, 0);
+  lcd.print("Menu?");
+  while(true) {
+    if(joystick.was_pressed() == 1) {
+      while(true) {
+
+        if(joystick.was_pressed() == 1) {
+
+        }
+      }
+
+    }
+  }
 }
 
 void update_score() {
   if(game == true) {
     score_overall = millis()/1000;
+    int length = numdigits(score_overall);
+    lcd.setCursor(16-length, 0);//15
+    lcd.print(score_overall);
+    lcd.setCursor(16-length-6, 0);
+    lcd.print("Score:");
   }
-  int length = numdigits(score_overall);
-  lcd.setCursor(15-length, 0);
-  lcd.print(score_overall);
-  lcd.setCursor(15-length-6, 0);
-  lcd.print("Score:");
+  else {
+    lcd.setCursor(6, 0);
+    lcd.print(score_overall);
+    lcd.setCursor(0, 0);
+    lcd.print("Score:");
+  }
 }
 
 void update_game() {
   if(millis() - last_spawn >= spawn_time){
-    if(updates_velocity % 7 == 0 && velocity < velocity_bound) {
-      velocity += 0.1;
+    if(updates_velocity % 5 == 0 && velocity < velocity_bound) {
+      velocity += 0.2;
     }
     last_spawn += spawn_time;
     spawn_time = 4000/velocity;
@@ -108,11 +136,11 @@ void update_game() {
 }
 
 void update_all_cacti(){
+  if(positions[1][1] == 1 && positions[1][0] == 2) {
+    end_game();
+  }
   for(int i = 1; i <= 15; i++) {
-    if(positions[1][1] == 1 && positions[1][0] == 2) {
-      end_game();
-    }
-    else if(positions[1][i] == 1) {
+    if(positions[1][i] == 1) {
       draw(cacti_char, i-1, 1);
       lcd.setCursor(i, 1);
       lcd.print(" ");
@@ -126,14 +154,6 @@ void cacti_spawn() {
   draw(cacti_char, 15, 1);
   positions[1][15] = 1;
 }
-
-
-
-
-
-
-
-
 
 int numdigits(int i) {
     int digits;
