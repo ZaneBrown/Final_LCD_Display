@@ -34,21 +34,84 @@ int update_time = spawn_time/6;
 int score_overall = 0;
 int start_time = millis();
 
+int times_played = 1;
+int left_presses = 0;
+int time_last_secret = 0;
 int choice = 1;
-
+int time_last_secret_2 = 0;
+bool last_choice = false;
 
 void setup() {
   Serial.begin(9600);
   lcd.begin(16, 2);//col, row
   lcd.createChar(0, dino);//lcd has max of 8 custom characters
   lcd.createChar(1, cacti);
-  lcd.cursor();
-  lcd.noCursor();
 }
 
 void loop() {
-  //lcd.print("1. Dinosaur Game");
-  dino_game();
+  if(left_presses >= 10) {
+    game2();
+  }
+  else if(millis()-time_last_secret >= 500 && joystick.get_xPos() <= -90) {
+    left_presses++;
+    time_last_secret = millis();
+  }
+  else if(times_played == 1) {
+    lcd.setCursor(0, 0);
+    lcd.print("1. Dinosaur Game");
+    if(choice == 1 && joystick.was_pressed() == 1) {
+      dino_game();
+      times_played++;
+    }
+  }
+}
+
+void game2() {
+  lcd.clear();
+    lcd.setCursor(0,0);
+    lcd.print("Ass or Tits?");
+    while(true) {
+      if(last_choice == true) {
+        lcd.setCursor(0, 1);
+        if(choice == 1) {
+          lcd.print("Ass ");
+        }
+        else if(choice == 2) {
+          lcd.print("Tits");
+        }
+      }
+      last_choice = false;
+      if((joystick.get_yPos() >= 80 || joystick.get_yPos() <= -80) && millis()-time_last_secret_2 >= 250) {
+        change_selection();
+        time_last_secret_2 = millis();
+        last_choice = true;
+      }
+      if(joystick.was_pressed() == 1 && choice == 1) {
+        lcd.clear();
+        lcd.setCursor(0,0);
+        lcd.print("Butt man.");
+        lcd.setCursor(0,1);
+        lcd.print("Sweet!");
+        choice = 3;
+      }
+      if(joystick.was_pressed() == 1 && choice == 2) {
+        lcd.clear();
+        lcd.setCursor(0,0);
+        lcd.print("Titties");
+        lcd.setCursor(0,1);
+        lcd.print("Nice!");
+        choice = 3;
+      }
+    }
+}
+
+void change_selection() {
+  if(choice == 1) {
+    choice = 2;
+  }
+  else if(choice == 2) {
+    choice = 1;
+  }
 }
 
 void dino_game() {
@@ -76,6 +139,7 @@ void dino_game() {
 }
 
 void start_game() {
+  lcd.clear();
   draw(dino_char, 0, 1);
   positions[1][0] = 2;
   update_score();
@@ -84,19 +148,6 @@ void start_game() {
 void end_game() {
   lcd.clear();
   game = false;
-  lcd.setCursor(11, 0);
-  lcd.print("Menu?");
-  while(true) {
-    if(joystick.was_pressed() == 1) {
-      while(true) {
-
-        if(joystick.was_pressed() == 1) {
-
-        }
-      }
-
-    }
-  }
 }
 
 void update_score() {
@@ -109,9 +160,12 @@ void update_score() {
     lcd.print("Score:");
   }
   else {
-    lcd.setCursor(6, 0);
-    lcd.print(score_overall);
     lcd.setCursor(0, 0);
+    lcd.print("Game Over!");
+    int length = numdigits(score_overall);
+    lcd.setCursor(16-length, 1);
+    lcd.print(score_overall);
+    lcd.setCursor(16-length-6, 1);
     lcd.print("Score:");
   }
 }
